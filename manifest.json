@@ -1,6 +1,6 @@
 {
   "Name": "Steam Info",
-  "Version": "0.0.1",
+  "Version": "0.0.2",
   "Id": "SteamInfo",
   "MinimumGameVersion": "0.6.1.0",
   "Description": "Steam Info",
