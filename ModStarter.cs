@@ -26,8 +26,8 @@ namespace Mods.SteamInfo {
       var obrw = new ObjectSaveReaderWriter(merger);
       var modLoader = new ModLoader(obrw);
       foreach (var tuple in GetMods(modLoader)) {
-        tuple.Deconstruct(out var state, out var mod);
-        Debug.Log("- " + state.ToString().Replace("k_EItemState", "") + ": " + mod.ModDirectory.Directory.Name + "/" + mod.Manifest.Name + " (" + mod.Manifest.Version.AsFormattedString() + ")");
+        tuple.Deconstruct(out var state, out var lastUpdate, out var mod);
+        Debug.Log("- " + state.ToString().Replace("k_EItemState", "") + ": " + mod.ModDirectory.Directory.Name + "/" + mod.Manifest.Name + " (" + mod.Manifest.Version.AsFormattedString() + "), Updated=" + lastUpdate.ToString("o"));
       }
 
       Debug.Log("Triggering query for installed workshop items");
@@ -38,9 +38,10 @@ namespace Mods.SteamInfo {
         };
         if (items == null) {
           Debug.Log("- null items");
-        };
-        foreach (var item in items) {
-          Debug.Log("- " + item.Title + "/" + item.Description + ": Created=" + item.UgcDetails.m_rtimeCreated + ", Updated=" + item.UgcDetails.m_rtimeUpdated);
+        } else {
+          foreach (var item in items) {
+            Debug.Log("- " + item.FileId + "/" + item.Title + ", Updated=" + item.TimeUpdated.ToString("o"));
+          };
         };
       });
     }
@@ -52,13 +53,10 @@ namespace Mods.SteamInfo {
       public string Title { get; set; }
       public string Description { get; set; }
       public string Metadata { get; set; }
+      public DateTime TimeUpdated { get; set; }
       public ERemoteStoragePublishedFileVisibility Visibility { get; set; }
       public List<string> Tags { get; set; }
       public Dictionary<string, string> KeyValues { get; set; }
-      public string UpdateLanguage { get; set; }
-      public string UpdateContentPath { get; set; }
-      public string UpdatePreviewPath { get; set; }
-      public string UpdateChangeNotes { get; set; }
       public SteamUGCDetails_t UgcDetails { get; internal set; }
 
       public SteamWorkshopItem() {
@@ -77,7 +75,6 @@ namespace Mods.SteamInfo {
         return false;
 
       UGCQueryHandle_t query = SteamUGC.CreateQueryUGCDetailsRequest(subscribedFiles, (uint)subscribedFiles.Length);
-      SteamUGC.SetReturnLongDescription(query, true);
       SteamUGC.SetReturnMetadata(query, true);
       SteamAPICall_t apiCall = SteamUGC.SendQueryUGCRequest(query);
       var callResult = CallResult<SteamUGCQueryCompleted_t>.Create();
@@ -94,6 +91,7 @@ namespace Mods.SteamInfo {
             item.Description = details.m_rgchDescription;
             SteamUGC.GetQueryUGCMetadata(query, i, out string metadata, Constants.k_cchDeveloperMetadataMax);
             item.Metadata = metadata;
+            item.TimeUpdated = DateTimeOffset.FromUnixTimeSeconds(details.m_rtimeUpdated).LocalDateTime;
             item.Visibility = details.m_eVisibility;
             item.Tags.AddRange(details.m_rgchTags.Split(','));
             // KeyValues should be converted to a List<KeyValuePair<string, string>>, so ignore for now
@@ -111,32 +109,34 @@ namespace Mods.SteamInfo {
 
     // From Timberborn.Modding.ModRepository
 
-    private IEnumerable<Tuple<EItemState, Mod>> GetMods(ModLoader modLoader) {
+    private IEnumerable<Tuple<EItemState, DateTime, Mod>> GetMods(ModLoader modLoader) {
       foreach (var t in GetModDirectories(modLoader)) {
-        t.Deconstruct(out var state, out var modDirectory);
+        t.Deconstruct(out var state, out var lastUpdate, out var modDirectory);
         if (modLoader.TryLoadMod(modDirectory, out var mod)) {
-          yield return new Tuple<EItemState, Mod>(state, mod);
+          yield return new Tuple<EItemState, DateTime, Mod>(state, lastUpdate, mod);
         }
       }
     }
 
     // From Timberborn.SteamWorkshopModDownloading.SteamWorkshopModsProvider
 
-    public IEnumerable<Tuple<EItemState, ModDirectory>> GetModDirectories(ModLoader modLoader) {
+    public IEnumerable<Tuple<EItemState, DateTime, ModDirectory>> GetModDirectories(ModLoader modLoader) {
       foreach (var tuple in GetContentDirectories()) {
-        tuple.Deconstruct(out var state, out var contentDirectory);
+        tuple.Deconstruct(out var state, out var contentDirectory, out var timeStamp);
         if (modLoader.IsModDirectory(new DirectoryInfo(contentDirectory))) {
-          yield return new Tuple<EItemState, ModDirectory>(state, new ModDirectory(new DirectoryInfo(contentDirectory), isUserMod: false, "Steam Workshop"));
+          var lastUpdate = DateTimeOffset.FromUnixTimeSeconds(timeStamp).LocalDateTime;
+          var modDirectory = new ModDirectory(new DirectoryInfo(contentDirectory), isUserMod: false, "Steam Workshop");
+          yield return new Tuple<EItemState, DateTime, ModDirectory>(state, lastUpdate, modDirectory);
         }
       }
     }
 
     // From Timberborn.SteamWorkshopContent.SteamWorkshopContentProvider
 
-    public IEnumerable<Tuple<EItemState, string>> GetContentDirectories() {
+    public IEnumerable<Tuple<EItemState, string, uint>> GetContentDirectories() {
       foreach (PublishedFileId_t subscribedItem in GetSubscribedItems()) {
-        if (SteamUGC.GetItemInstallInfo(subscribedItem, out var _, out var pchFolder, PathBufferSize, out var _)) {
-          yield return new Tuple<EItemState, string>((EItemState)SteamUGC.GetItemState(subscribedItem), pchFolder);
+        if (SteamUGC.GetItemInstallInfo(subscribedItem, out var _, out var pchFolder, PathBufferSize, out var punTimeStamp)) {
+          yield return new Tuple<EItemState, string, uint>((EItemState)SteamUGC.GetItemState(subscribedItem), pchFolder, punTimeStamp);
         }
       }
     }
