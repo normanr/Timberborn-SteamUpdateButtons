@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using Steamworks;
 using UnityEngine;
 using Timberborn.ModManagerScene;
@@ -17,33 +18,45 @@ namespace Mods.SteamInfo {
     }
 
     public void StartMod(IModEnvironment modEnvironment) {
-      if (modEnvironment != null) {
-        Debug.Log("SteamInfo.ModPath = " + modEnvironment.ModPath);
-      }
+      // if (modEnvironment != null) {
+      //   Debug.Log("SteamInfo.ModPath = " + modEnvironment.ModPath);
+      // }
 
-      Debug.Log("Steam mods (local cache):");
-      var merger = new JsonMerger();
-      var obrw = new ObjectSaveReaderWriter(merger);
-      var modLoader = new ModLoader(obrw);
-      foreach (var tuple in GetMods(modLoader)) {
-        tuple.Deconstruct(out var state, out var lastUpdate, out var mod);
-        Debug.Log("- " + state.ToString().Replace("k_EItemState", "") + ": " + mod.ModDirectory.Directory.Name + "/" + mod.Manifest.Name + " (" + mod.Manifest.Version.AsFormattedString() + "), Updated=" + lastUpdate.ToString("o"));
-      }
+      // Debug.Log("Steam mods (local cache):");
+      // var merger = new JsonMerger();
+      // var obrw = new ObjectSaveReaderWriter(merger);
+      // var modLoader = new ModLoader(obrw);
+      // foreach (var tuple in GetMods(modLoader)) {
+      //   tuple.Deconstruct(out var state, out var lastUpdate, out var mod);
+      //   Debug.Log("- " + mod.ModDirectory.Directory.Name + "/" + mod.Manifest.Name + " (" + mod.Manifest.Version.AsFormattedString() + "), Updated=" + lastUpdate.ToLocalTime().ToString("o"));
+      // }
 
-      Debug.Log("Triggering query for installed workshop items");
+      Debug.Log("Steam workshop items:");
+      var ewh = new EventWaitHandle(false, EventResetMode.ManualReset);
       QueryInstalledWorkshopItems((items, param, ioFailure) => {
-        Debug.Log("Steam mods (subscribed at server):");
+        Debug.Log("result = " + param.m_eResult);
         if (ioFailure) {
-          Debug.Log("- ioFailure");
-        };
-        if (items == null) {
+          Debug.Log("- i/o failure");
+        } else if (items == null) {
           Debug.Log("- null items");
         } else {
           foreach (var item in items) {
-            Debug.Log("- " + item.FileId + "/" + item.Title + ", Updated=" + item.TimeUpdated.ToString("o"));
-          };
-        };
+            string state;
+            if (item.TimeUpdated > item.InstalledTime) {
+              state = "Newer";
+            } else if (item.TimeUpdated < item.InstalledTime) {
+              state = "Older";
+            } else {
+              state = "Equal";
+            }
+            Debug.Log("- [" + state + "] " + item.FileId + "/" + item.Title + ", Server=" + item.TimeUpdated.ToLocalTime().ToString("o") + ", Local=" + item.InstalledTime.ToLocalTime().ToString("o"));
+          }
+        }
+        ewh.Set();
       });
+      while (!ewh.WaitOne(10)) {
+        SteamAPI.RunCallbacks();
+      }
     }
 
     // From https://gist.github.com/GMMan/d9305ffde52372d926662522ed9259b1
@@ -54,6 +67,7 @@ namespace Mods.SteamInfo {
       public string Description { get; set; }
       public string Metadata { get; set; }
       public DateTime TimeUpdated { get; set; }
+      public DateTime InstalledTime { get; set; }
       public ERemoteStoragePublishedFileVisibility Visibility { get; set; }
       public List<string> Tags { get; set; }
       public Dictionary<string, string> KeyValues { get; set; }
@@ -91,11 +105,14 @@ namespace Mods.SteamInfo {
             item.Description = details.m_rgchDescription;
             SteamUGC.GetQueryUGCMetadata(query, i, out string metadata, Constants.k_cchDeveloperMetadataMax);
             item.Metadata = metadata;
-            item.TimeUpdated = DateTimeOffset.FromUnixTimeSeconds(details.m_rtimeUpdated).LocalDateTime;
+            item.TimeUpdated = DateTimeOffset.FromUnixTimeSeconds(details.m_rtimeUpdated).UtcDateTime;
             item.Visibility = details.m_eVisibility;
             item.Tags.AddRange(details.m_rgchTags.Split(','));
             // KeyValues should be converted to a List<KeyValuePair<string, string>>, so ignore for now
             item.UgcDetails = details;
+            if (SteamUGC.GetItemInstallInfo(details.m_nPublishedFileId, out var _, out var _, PathBufferSize, out var punTimeStamp)) {
+              item.InstalledTime = DateTimeOffset.FromUnixTimeSeconds(punTimeStamp).UtcDateTime;
+            }
             items.Add(item);
           }
         }
@@ -124,7 +141,7 @@ namespace Mods.SteamInfo {
       foreach (var tuple in GetContentDirectories()) {
         tuple.Deconstruct(out var state, out var contentDirectory, out var timeStamp);
         if (modLoader.IsModDirectory(new DirectoryInfo(contentDirectory))) {
-          var lastUpdate = DateTimeOffset.FromUnixTimeSeconds(timeStamp).LocalDateTime;
+          var lastUpdate = DateTimeOffset.FromUnixTimeSeconds(timeStamp).UtcDateTime;
           var modDirectory = new ModDirectory(new DirectoryInfo(contentDirectory), isUserMod: false, "Steam Workshop");
           yield return new Tuple<EItemState, DateTime, ModDirectory>(state, lastUpdate, modDirectory);
         }
