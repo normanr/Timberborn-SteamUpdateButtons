@@ -1,9 +1,13 @@
 {
   "Name": "Steam Info",
-  "Version": "0.0.4",
+  "Version": "0.0.5",
   "Id": "SteamInfo",
   "MinimumGameVersion": "0.6.1.0",
   "Description": "Steam Info",
   "RequiredMods": [
+     {
+      "Id": "TimberApi",
+      "MinimumVersion": "0.7.4.0"
+    }
   ]
 }

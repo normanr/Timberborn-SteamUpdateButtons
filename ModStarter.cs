@@ -6,8 +6,6 @@ using Steamworks;
 using UnityEngine;
 using Timberborn.ModManagerScene;
 using Timberborn.Modding;
-using Timberborn.SerializationSystem;
-using Timberborn.SteamStoreSystem;
 
 namespace Mods.SteamInfo {
   internal class ModStarter : IModStarter {
@@ -31,14 +29,14 @@ namespace Mods.SteamInfo {
       //   Debug.Log("- " + mod.ModDirectory.Directory.Name + "/" + mod.Manifest.Name + " (" + mod.Manifest.Version.AsFormattedString() + "), Updated=" + lastUpdate.ToLocalTime().ToString("o"));
       // }
 
-      Debug.Log("Steam workshop items:");
+      Debug.Log(DateTime.Now.ToString("hh:mm:ss.fff") + " Steam workshop items:");
       var ewh = new EventWaitHandle(false, EventResetMode.ManualReset);
       QueryInstalledWorkshopItems((items, param, ioFailure) => {
-        Debug.Log("result = " + param.m_eResult);
+        Debug.Log(DateTime.Now.ToString("hh:mm:ss.fff") + " result = " + param.m_eResult);
         if (ioFailure) {
-          Debug.Log("- i/o failure");
+          Debug.Log(DateTime.Now.ToString("hh:mm:ss.fff") + " - i/o failure");
         } else if (items == null) {
-          Debug.Log("- null items");
+          Debug.Log(DateTime.Now.ToString("hh:mm:ss.fff") + " - null items");
         } else {
           foreach (var item in items) {
             string state;
@@ -49,7 +47,8 @@ namespace Mods.SteamInfo {
             } else {
               state = "Equal";
             }
-            Debug.Log("- [" + state + "] " + item.FileId + "/" + item.Title + ", Server=" + item.TimeUpdated.ToLocalTime().ToString("o") + ", Local=" + item.InstalledTime.ToLocalTime().ToString("o"));
+            Debug.Log(DateTime.Now.ToString("hh:mm:ss.fff") + " - [" + state + "] " + item.FileId + "/" + item.Title + ", Server=" + item.TimeUpdated.ToLocalTime().ToString("o") + ", Local=" + item.InstalledTime.ToLocalTime().ToString("o"));
+            // Debug.Log("  in " + item.Folder);
           }
         }
         ewh.Set();
@@ -63,6 +62,7 @@ namespace Mods.SteamInfo {
 
     class SteamWorkshopItem {
       public PublishedFileId_t FileId { get; set; }
+      public string Folder { get; set; }
       public string Title { get; set; }
       public string Description { get; set; }
       public string Metadata { get; set; }
@@ -110,7 +110,8 @@ namespace Mods.SteamInfo {
             item.Tags.AddRange(details.m_rgchTags.Split(','));
             // KeyValues should be converted to a List<KeyValuePair<string, string>>, so ignore for now
             item.UgcDetails = details;
-            if (SteamUGC.GetItemInstallInfo(details.m_nPublishedFileId, out var _, out var _, PathBufferSize, out var punTimeStamp)) {
+            if (SteamUGC.GetItemInstallInfo(details.m_nPublishedFileId, out var _, out var pchFolder, PathBufferSize, out var punTimeStamp)) {
+              item.Folder = pchFolder;
               item.InstalledTime = DateTimeOffset.FromUnixTimeSeconds(punTimeStamp).UtcDateTime;
             }
             items.Add(item);
