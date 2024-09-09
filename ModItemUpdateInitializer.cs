@@ -9,6 +9,7 @@ using Timberborn.SingletonSystem;
 using UnityEngine;
 using UnityEngine.UIElements;
 using TimberApi.UIBuilderSystem;
+using Mods.SteamInfo.SteamWorkshopModDownloading;
 
 namespace Mods.SteamInfo {
   internal class ModItemUpdateInitializer : ILoadableSingleton {
@@ -17,24 +18,31 @@ namespace Mods.SteamInfo {
     private static readonly string ModItemsFieldName = "_modItems";
     private readonly UIBuilder _uiBuilder;
     private readonly ModManagerBox _modManagerBox;
-    private readonly SteamWorkshopContentProvider _steamWorkshopContentProvider;
+    private readonly SteamWorkshopModsProvider _steamWorkshopModsProvider;
 
     public ModItemUpdateInitializer(UIBuilder uiBuilder,
                                     ModManagerBox modManagerBox,
-                                    SteamWorkshopContentProvider steamWorkshopContentProvider) {
+                                    SteamWorkshopModsProvider steamWorkshopModsProvider) {
       _uiBuilder = uiBuilder;
       _modManagerBox = modManagerBox;
-      _steamWorkshopContentProvider = steamWorkshopContentProvider;
-      // Debug.Log("SteamInfo.ModItemUpdateInitializer()");
+      _steamWorkshopModsProvider = steamWorkshopModsProvider;
     }
 
     public void Load() {
-      // Debug.Log("SteamInfo.ModItemUpdateInitializer.Load()");
+      _steamWorkshopModsProvider.DownloadComplete += (sender, e) => {
+        OnModToggled(this, EventArgs.Empty);
+        foreach (var createdModItem in GetCreatedModItems()) {
+          if (createdModItem.Key.ModDirectory.IsUserMod) {
+            continue;
+          }
+          Update(createdModItem.Value);
+        }
+      };
       foreach (var createdModItem in GetCreatedModItems()) {
         if (createdModItem.Key.ModDirectory.IsUserMod) {
           continue;
         }
-        Initialize(createdModItem.Key, createdModItem.Value);
+        Initialize(createdModItem.Value);
       }
     }
 
@@ -49,6 +57,17 @@ namespace Mods.SteamInfo {
       return (Dictionary<Mod, ModItem>)modItemsField.GetValue(modListView);
     }
 
+    private Dictionary<Mod, ModItem> OnModToggled(object sender, EventArgs e) {
+      var modListView = GetModListView();
+      var onModToggledMethod = modListView.GetType()
+          .GetMethod("OnModToggled", BindingFlags.Instance | BindingFlags.NonPublic);
+      if (onModToggledMethod == null) {
+        throw new Exception($"Mod items field named {ModItemsFieldName} "
+                   + $"wasn't found in {modListView.GetType().Name}");
+      }
+      return (Dictionary<Mod, ModItem>)onModToggledMethod.Invoke(modListView, new object[] { sender, e });
+    }
+
     private ModListView GetModListView() {
       var modListViewField = _modManagerBox.GetType()
           .GetField(ModListViewFieldName, BindingFlags.Instance | BindingFlags.NonPublic);
@@ -59,19 +78,22 @@ namespace Mods.SteamInfo {
       return (ModListView)modListViewField.GetValue(_modManagerBox);
     }
 
-    private void Initialize(Mod mod, ModItem modItem) {
-      // Debug.Log(mod.ModDirectory.Path);
-
-      var button = _uiBuilder.Build<UpdateButton>();
+    private void Initialize(ModItem modItem) {
+      var button = _uiBuilder.Build<UpdateButton>("UpdateModButton");
       modItem.Root.Add(button);
-      //button.RegisterCallback<AttachToPanelEvent>(
-          //_ => button.ToggleDisplayStyle(
-              //_modSettingsOwnerRegistry.HasModSettings(modItem.Mod)));
+      button.RegisterCallback<AttachToPanelEvent>(
+          _ => button.ToggleDisplayStyle(
+              _steamWorkshopModsProvider.IsUpdatable(modItem.Mod.ModDirectory)));
       button.RegisterCallback<ClickEvent>(ce => {
-        // _modSettingsBox.Open(modItem.Mod)
-        Debug.Log(DateTime.Now.ToString("hh:mm:ss.fff") + ": SteamInfo.Update: " + modItem.Mod.DisplayName);
-        _steamWorkshopContentProvider.UpdateItem(modItem.Mod.ModDirectory.Path);
+        Debug.Log(DateTime.Now.ToString("HH:mm:ss.fff") + ": SteamInfo.Update: " + modItem.Mod.DisplayName);
+        _steamWorkshopModsProvider.UpdateModDirectory(modItem.Mod.ModDirectory);
       });
+    }
+
+    private void Update(ModItem modItem) {
+      var button = modItem.Root.Q<Button>("UpdateModButton");
+      button.ToggleDisplayStyle(
+          _steamWorkshopModsProvider.IsUpdatable(modItem.Mod.ModDirectory));
     }
   }
 }
