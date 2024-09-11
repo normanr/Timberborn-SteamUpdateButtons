@@ -64,6 +64,15 @@ namespace Mods.SteamUpdateButtons.SteamWorkshopModDownloading {
       });
     }
 
+    private readonly DateTime UnixEpoch = DateTimeOffset.FromUnixTimeSeconds(0).UtcDateTime;
+    public bool IsAvailable(ModDirectory directory) {
+      if (_items.TryGetValue(directory.Path, out var t)) {
+        t.Deconstruct(out var contentDirectory, out var workshopItem);
+        return workshopItem.TimeUpdated > UnixEpoch;
+      }
+      return false;
+    }
+
     public bool IsUpdatable(ModDirectory directory) {
       if (_items.TryGetValue(directory.Path, out var t)) {
         t.Deconstruct(out var contentDirectory, out var workshopItem);

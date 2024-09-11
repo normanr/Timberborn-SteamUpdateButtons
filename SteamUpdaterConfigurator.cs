@@ -11,6 +11,7 @@ namespace Mods.SteamUpdateButtons {
       containerDefinition.Bind<SteamWorkshopContentProvider>().AsSingleton();
       containerDefinition.Bind<SteamWorkshopModsProvider>().AsSingleton();
       containerDefinition.Bind<UpdateButton>().AsTransient();
+      containerDefinition.Bind<UnavailableImage>().AsTransient();
     }
 
   }

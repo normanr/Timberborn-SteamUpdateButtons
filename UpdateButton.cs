@@ -18,7 +18,8 @@ namespace Mods.SteamUpdateButtons {
           .AddClass("update-button", builder => builder
               .ClickSound("UI.Click")
               .Height(28)
-              .Width(28));
+              .Width(28)
+              .MarginLeft(7));
     }
   }
 }

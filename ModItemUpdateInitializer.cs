@@ -79,6 +79,11 @@ namespace Mods.SteamUpdateButtons {
     }
 
     private void Initialize(ModItem modItem) {
+      var image = _uiBuilder.Build<UnavailableImage>("UnavailableImage");
+      modItem.Root.Add(image);
+      image.RegisterCallback<AttachToPanelEvent>(
+          _ => image.ToggleDisplayStyle(
+              !_steamWorkshopModsProvider.IsAvailable(modItem.Mod.ModDirectory)));
       var button = _uiBuilder.Build<UpdateButton>("UpdateModButton");
       modItem.Root.Add(button);
       button.RegisterCallback<AttachToPanelEvent>(
@@ -91,7 +96,10 @@ namespace Mods.SteamUpdateButtons {
     }
 
     private void Update(ModItem modItem) {
-      var button = modItem.Root.Q<Button>("UpdateModButton");
+      var image = modItem.Root.Q<VisualElement>("UnavailableImage");
+      image.ToggleDisplayStyle(
+          !_steamWorkshopModsProvider.IsAvailable(modItem.Mod.ModDirectory));
+      var button = modItem.Root.Q<VisualElement>("UpdateModButton");
       button.ToggleDisplayStyle(
           _steamWorkshopModsProvider.IsUpdatable(modItem.Mod.ModDirectory));
     }

@@ -115,6 +115,7 @@
     <Compile Include="SteamWorkshopContent\SteamWorkshopContentProvider.cs" />
     <Compile Include="SteamWorkshop\SteamWorkshopItem.cs" />
     <Compile Include="SteamWorkshopContent\ContentDirectory.cs" />
+    <Compile Include="UnavailableImage.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="manifest.json">
