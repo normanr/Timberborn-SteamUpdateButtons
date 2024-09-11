@@ -1,13 +1,12 @@
-﻿using System;
-using UnityEngine.UIElements;
-using TimberApi.UIBuilderSystem;
+﻿using TimberApi.UIBuilderSystem;
+using TimberApi.UIBuilderSystem.CustomElements;
 using TimberApi.UIBuilderSystem.ElementBuilders;
 using TimberApi.UIBuilderSystem.StyleSheetSystem;
 using TimberApi.UIBuilderSystem.StyleSheetSystem.Extensions;
 
-namespace Mods.SteamInfo {
-  public class UpdateButton : BaseBuilder<Button> {
-    protected override Button InitializeRoot() {
+namespace Mods.SteamUpdateButtons {
+  public class UpdateButton : BaseBuilder<NineSliceButton> {
+    protected override NineSliceButton InitializeRoot() {
       return UIBuilder.Create<ButtonBuilder>()
           .AddClass("update-button")
           .Build();

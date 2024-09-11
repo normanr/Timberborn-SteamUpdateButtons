@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using Timberborn.Modding;
 using Timberborn.SingletonSystem;
-using Mods.SteamInfo.SteamWorkshop;
-using Mods.SteamInfo.SteamWorkshopContent;
+using Mods.SteamUpdateButtons.SteamWorkshop;
+using Mods.SteamUpdateButtons.SteamWorkshopContent;
 
-namespace Mods.SteamInfo.SteamWorkshopModDownloading {
+namespace Mods.SteamUpdateButtons.SteamWorkshopModDownloading {
   public class SteamWorkshopModsProvider : Timberborn.SteamWorkshopModDownloading.SteamWorkshopModsProvider, ILoadableSingleton {
     private readonly SteamWorkshopContentProvider _steamWorkshopContentProvider;
     private readonly ModLoader _modLoader;

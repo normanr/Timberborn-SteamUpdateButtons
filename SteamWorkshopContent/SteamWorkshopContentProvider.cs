@@ -6,7 +6,7 @@ using Steamworks;
 using Timberborn.SingletonSystem;
 using Timberborn.SteamStoreSystem;
 
-namespace Mods.SteamInfo.SteamWorkshopContent {
+namespace Mods.SteamUpdateButtons.SteamWorkshopContent {
   public class SteamWorkshopContentProvider : Timberborn.SteamWorkshopContent.SteamWorkshopContentProvider, ILoadableSingleton {
     private static readonly uint PathBufferSize = 1024u;
 

@@ -1,6 +1,6 @@
 ﻿using Steamworks;
 
-namespace Mods.SteamInfo.SteamWorkshop {
+namespace Mods.SteamUpdateButtons.SteamWorkshop {
   public class SteamWorkshopQueryHandle {
     private readonly UGCQueryHandle_t _queryHandle;
 

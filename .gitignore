@@ -1,0 +1,6 @@
+bin/
+obj/
+Timberborn
+TimberApi
+*.csproj.user
+.vs/*/xs/UserPrefs.xml

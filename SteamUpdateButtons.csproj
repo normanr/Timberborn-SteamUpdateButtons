@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{0281FD31-20FF-44B5-97A5-3459D29D87F9}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Mods.SteamUpdateButtons</RootNamespace>
+    <AssemblyName>SteamUpdateButtons</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>embedded</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+    <LangVersion>Latest</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+    <LangVersion>Latest</LangVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System">
+      <HintPath>Timberborn\Timberborn_Data\Managed\System.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="System.Collections.Immutable">
+      <HintPath>Timberborn\Timberborn_Data\Managed\System.Collections.Immutable.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="com.rlabrecque.steamworks.net">
+      <HintPath>Timberborn\Timberborn_Data\Managed\com.rlabrecque.steamworks.net.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Bindito.Core">
+      <HintPath>Timberborn\Timberborn_Data\Managed\Bindito.Core.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>Timberborn\Timberborn_Data\Managed\UnityEngine.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>Timberborn\Timberborn_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UIElementsModule">
+      <HintPath>Timberborn\Timberborn_Data\Managed\UnityEngine.UIElementsModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Timberborn.CoreUI">
+      <HintPath>Timberborn\Timberborn_Data\Managed\Timberborn.CoreUI.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Timberborn.MainMenuModdingUI">
+      <HintPath>Timberborn\Timberborn_Data\Managed\Timberborn.MainMenuModdingUI.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Timberborn.ModManagerScene">
+      <HintPath>Timberborn\Timberborn_Data\Managed\Timberborn.ModManagerScene.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Timberborn.Modding">
+      <HintPath>Timberborn\Timberborn_Data\Managed\Timberborn.Modding.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Timberborn.ModdingUI">
+      <HintPath>Timberborn\Timberborn_Data\Managed\Timberborn.ModdingUI.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Timberborn.SingletonSystem">
+      <HintPath>Timberborn\Timberborn_Data\Managed\Timberborn.SingletonSystem.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Timberborn.SteamStoreSystem">
+      <HintPath>Timberborn\Timberborn_Data\Managed\Timberborn.SteamStoreSystem.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Timberborn.SteamWorkshop">
+      <HintPath>Timberborn\Timberborn_Data\Managed\Timberborn.SteamWorkshop.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Timberborn.SteamWorkshopContent">
+      <HintPath>Timberborn\Timberborn_Data\Managed\Timberborn.SteamWorkshopContent.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Timberborn.SteamWorkshopModDownloading">
+      <HintPath>Timberborn\Timberborn_Data\Managed\Timberborn.SteamWorkshopModDownloading.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="TimberApi.UIBuilderSystem">
+      <HintPath>TimberApi\core\TimberApi.UIBuilderSystem.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ModItemUpdateInitializer.cs" />
+    <Compile Include="SteamUpdaterConfigurator.cs" />
+    <Compile Include="UpdateButton.cs" />
+    <Compile Include="SteamWorkshop\SteamWorkshopQueryHandle.cs" />
+    <Compile Include="SteamWorkshop\SteamWorkshopQueryRequest.cs" />
+    <Compile Include="SteamWorkshop\SteamWorkshopQueryRequester.cs" />
+    <Compile Include="SteamWorkshop\SteamWorkshopQueryResponse.cs" />
+    <Compile Include="SteamWorkshopModDownloading\SteamWorkshopModsProvider.cs" />
+    <Compile Include="SteamWorkshopContent\SteamWorkshopContentProvider.cs" />
+    <Compile Include="SteamWorkshop\SteamWorkshopItem.cs" />
+    <Compile Include="SteamWorkshopContent\ContentDirectory.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="manifest.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="SteamWorkshop\" />
+    <Folder Include="SteamWorkshopModDownloading\" />
+    <Folder Include="SteamWorkshopContent\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+</Project>

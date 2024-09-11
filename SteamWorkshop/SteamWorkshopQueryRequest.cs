@@ -2,7 +2,7 @@
 using System.Collections.Immutable;
 using Steamworks;
 
-namespace Mods.SteamInfo.SteamWorkshop {
+namespace Mods.SteamUpdateButtons.SteamWorkshop {
   public class SteamWorkshopQueryRequest {
     public ImmutableArray<PublishedFileId_t> Files { get; }
 

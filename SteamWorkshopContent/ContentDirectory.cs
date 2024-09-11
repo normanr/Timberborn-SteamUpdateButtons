@@ -1,5 +1,5 @@
 ﻿using System;
-namespace Mods.SteamInfo.SteamWorkshopContent {
+namespace Mods.SteamUpdateButtons.SteamWorkshopContent {
   public class ContentDirectory {
     public ulong ItemId { get; }
     public string Folder { get; }

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Mods.SteamInfo.SteamWorkshop {
+namespace Mods.SteamUpdateButtons.SteamWorkshop {
   public class SteamWorkshopItem { // : Timberborn.SteamWorkshop.SteamWorkshopItem {
     public ulong ItemId { get; }
     public string Name { get; }

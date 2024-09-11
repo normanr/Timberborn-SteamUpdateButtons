@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Steamworks;
 
-namespace Mods.SteamInfo.SteamWorkshop {
+namespace Mods.SteamUpdateButtons.SteamWorkshop {
   public class SteamWorkshopQueryResponse {
     public SteamWorkshopQueryRequest Request { get; }
 

@@ -9,9 +9,9 @@ using Timberborn.SingletonSystem;
 using UnityEngine;
 using UnityEngine.UIElements;
 using TimberApi.UIBuilderSystem;
-using Mods.SteamInfo.SteamWorkshopModDownloading;
+using Mods.SteamUpdateButtons.SteamWorkshopModDownloading;
 
-namespace Mods.SteamInfo {
+namespace Mods.SteamUpdateButtons {
   internal class ModItemUpdateInitializer : ILoadableSingleton {
 
     private static readonly string ModListViewFieldName = "_modListView";
@@ -85,7 +85,7 @@ namespace Mods.SteamInfo {
           _ => button.ToggleDisplayStyle(
               _steamWorkshopModsProvider.IsUpdatable(modItem.Mod.ModDirectory)));
       button.RegisterCallback<ClickEvent>(ce => {
-        Debug.Log(DateTime.Now.ToString("HH:mm:ss.fff") + ": SteamInfo.Update: " + modItem.Mod.DisplayName);
+        Debug.Log(DateTime.Now.ToString("HH:mm:ss.fff") + ": SteamUpdateButtons.Update: " + modItem.Mod.DisplayName);
         _steamWorkshopModsProvider.UpdateModDirectory(modItem.Mod.ModDirectory);
       });
     }

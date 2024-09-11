@@ -1,8 +1,8 @@
 ﻿using Bindito.Core;
-using Mods.SteamInfo.SteamWorkshopContent;
-using Mods.SteamInfo.SteamWorkshopModDownloading;
+using Mods.SteamUpdateButtons.SteamWorkshopContent;
+using Mods.SteamUpdateButtons.SteamWorkshopModDownloading;
 
-namespace Mods.SteamInfo {
+namespace Mods.SteamUpdateButtons {
   [Context("MainMenu")]
   internal class SteamUpdaterConfigurator : IConfigurator {
 

@@ -1,7 +1,7 @@
 ﻿using System;
 using Steamworks;
 
-namespace Mods.SteamInfo.SteamWorkshop {
+namespace Mods.SteamUpdateButtons.SteamWorkshop {
   public class SteamWorkshopQueryRequester {
 
     public SteamWorkshopQueryHandle Query(SteamWorkshopQueryRequest request, Action<SteamWorkshopQueryResponse> queryCallback) {
