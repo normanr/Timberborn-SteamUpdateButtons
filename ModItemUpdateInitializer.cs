@@ -17,13 +17,16 @@ namespace Mods.SteamUpdateButtons {
     private static readonly string ModListViewFieldName = "_modListView";
     private static readonly string ModItemsFieldName = "_modItems";
     private readonly UIBuilder _uiBuilder;
+    private readonly ModLoader _modLoader;
     private readonly ModManagerBox _modManagerBox;
     private readonly SteamWorkshopModsProvider _steamWorkshopModsProvider;
 
     public ModItemUpdateInitializer(UIBuilder uiBuilder,
+                                    ModLoader modLoader,
                                     ModManagerBox modManagerBox,
                                     SteamWorkshopModsProvider steamWorkshopModsProvider) {
       _uiBuilder = uiBuilder;
+      _modLoader = modLoader;
       _modManagerBox = modManagerBox;
       _steamWorkshopModsProvider = steamWorkshopModsProvider;
     }
@@ -96,6 +99,13 @@ namespace Mods.SteamUpdateButtons {
     }
 
     private void Update(ModItem modItem) {
+      if (_modLoader.TryLoadMod(modItem.Mod.ModDirectory, out var mod)) {
+        var version = modItem.ModManifest.Version.AsFormattedString();
+        if (version != mod.Manifest.Version.AsFormattedString()) {
+          version += " → " + mod.Manifest.Version.AsFormattedString();
+          modItem.Root.Q<Label>("ModVersion").text = version;
+        }
+      }
       var image = modItem.Root.Q<VisualElement>("UnavailableImage");
       image.ToggleDisplayStyle(
           !_steamWorkshopModsProvider.IsAvailable(modItem.Mod.ModDirectory));
