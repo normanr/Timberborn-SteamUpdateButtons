@@ -3,29 +3,34 @@ using System.Collections.Generic;
 using UnityEngine;
 using Timberborn.Modding;
 using Timberborn.SingletonSystem;
+using Timberborn.SteamStoreSystem;
 using Mods.SteamUpdateButtons.SteamWorkshop;
 using Mods.SteamUpdateButtons.SteamWorkshopContent;
 
 namespace Mods.SteamUpdateButtons.SteamWorkshopModDownloading {
   public class SteamWorkshopModsProvider : Timberborn.SteamWorkshopModDownloading.SteamWorkshopModsProvider, ILoadableSingleton {
+    private readonly SteamManager _steamManager;
     private readonly SteamWorkshopContentProvider _steamWorkshopContentProvider;
     private readonly ModLoader _modLoader;
     private readonly Dictionary<string, Tuple<ContentDirectory, SteamWorkshopItem>> _items;
     public event EventHandler DownloadComplete;
 
-    public SteamWorkshopModsProvider(SteamWorkshopContentProvider steamWorkshopContentProvider, ModLoader modLoader) : base(steamWorkshopContentProvider, modLoader) {
+    public SteamWorkshopModsProvider(SteamManager steamManager, SteamWorkshopContentProvider steamWorkshopContentProvider, ModLoader modLoader) : base(steamWorkshopContentProvider, modLoader) {
+      _steamManager = steamManager;
       _steamWorkshopContentProvider = steamWorkshopContentProvider;
       _modLoader = modLoader;
       _items = new Dictionary<string, Tuple<ContentDirectory, SteamWorkshopItem>>();
     }
 
     public void Load() {
-      RefreshWorkshopItems(null);
-      _steamWorkshopContentProvider.DownloadComplete += (sender, e) => {
-        RefreshWorkshopItems(() => {
-          DownloadComplete?.Invoke(this, EventArgs.Empty);
-        });
-      };
+      if (_steamManager.Initialized) {
+        RefreshWorkshopItems(null);
+        _steamWorkshopContentProvider.DownloadComplete += (sender, e) => {
+          RefreshWorkshopItems(() => {
+            DownloadComplete?.Invoke(this, EventArgs.Empty);
+          });
+        };
+      }
     }
 
     public void RefreshWorkshopItems(Action callback) {
