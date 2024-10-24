@@ -28,6 +28,17 @@
     <ConsolePause>false</ConsolePause>
     <LangVersion>Latest</LangVersion>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Test|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>embedded</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;TEST;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+    <LangVersion>Latest</LangVersion>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System">
       <HintPath>Timberborn\Timberborn_Data\Managed\System.dll</HintPath>
@@ -63,6 +74,10 @@
     </Reference>
     <Reference Include="Timberborn.MainMenuModdingUI">
       <HintPath>Timberborn\Timberborn_Data\Managed\Timberborn.MainMenuModdingUI.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Timberborn.MainMenuPanels">
+      <HintPath>Timberborn\Timberborn_Data\Managed\Timberborn.MainMenuPanels.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="Timberborn.ModManagerScene">
@@ -116,6 +131,10 @@
     <Compile Include="SteamWorkshop\SteamWorkshopItem.cs" />
     <Compile Include="SteamWorkshopContent\ContentDirectory.cs" />
     <Compile Include="UnavailableImage.cs" />
+    <Compile Include="ModManagerButtonIndicatorInitializer.cs" />
+    <Compile Include="UpdateAvailableImage.cs" />
+    <Compile Include="MainMenuModdingUI\ModManagerBoxExtensions.cs" />
+    <Compile Include="ModdingUI\ModListViewExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="manifest.json">
@@ -126,6 +145,8 @@
     <Folder Include="SteamWorkshop\" />
     <Folder Include="SteamWorkshopModDownloading\" />
     <Folder Include="SteamWorkshopContent\" />
+    <Folder Include="MainMenuModdingUI\" />
+    <Folder Include="ModdingUI\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

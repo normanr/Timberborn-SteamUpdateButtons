@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Reflection;
 using Timberborn.CoreUI;
 using Timberborn.MainMenuModdingUI;
 using Timberborn.Modding;
@@ -9,13 +7,13 @@ using Timberborn.SingletonSystem;
 using UnityEngine;
 using UnityEngine.UIElements;
 using TimberApi.UIBuilderSystem;
+using Mods.SteamUpdateButtons.MainMenuModdingUI;
+using Mods.SteamUpdateButtons.ModdingUI;
 using Mods.SteamUpdateButtons.SteamWorkshopModDownloading;
 
 namespace Mods.SteamUpdateButtons {
   internal class ModItemUpdateInitializer : ILoadableSingleton {
 
-    private static readonly string ModListViewFieldName = "_modListView";
-    private static readonly string ModItemsFieldName = "_modItems";
     private readonly UIBuilder _uiBuilder;
     private readonly ModLoader _modLoader;
     private readonly ModManagerBox _modManagerBox;
@@ -29,56 +27,16 @@ namespace Mods.SteamUpdateButtons {
       _modLoader = modLoader;
       _modManagerBox = modManagerBox;
       _steamWorkshopModsProvider = steamWorkshopModsProvider;
+      _steamWorkshopModsProvider.DownloadComplete += SteamWorkshopModsProvider_DownloadComplete;
     }
 
     public void Load() {
-      _steamWorkshopModsProvider.DownloadComplete += (sender, e) => {
-        OnModToggled(this, EventArgs.Empty);
-        foreach (var createdModItem in GetCreatedModItems()) {
-          if (createdModItem.Key.ModDirectory.IsUserMod) {
-            continue;
-          }
-          Update(createdModItem.Value);
-        }
-      };
-      foreach (var createdModItem in GetCreatedModItems()) {
-        if (createdModItem.Key.ModDirectory.IsUserMod) {
+      foreach (var kv in _modManagerBox.GetModListView().GetModItems()) {
+        if (kv.Key.ModDirectory.IsUserMod) {
           continue;
         }
-        Initialize(createdModItem.Value);
+        Initialize(kv.Value);
       }
-    }
-
-    private Dictionary<Mod, ModItem> GetCreatedModItems() {
-      var modListView = GetModListView();
-      var modItemsField = modListView.GetType()
-          .GetField(ModItemsFieldName, BindingFlags.Instance | BindingFlags.NonPublic);
-      if (modItemsField == null) {
-        throw new Exception($"Mod items field named {ModItemsFieldName} "
-                   + $"wasn't found in {modListView.GetType().Name}");
-      }
-      return (Dictionary<Mod, ModItem>)modItemsField.GetValue(modListView);
-    }
-
-    private Dictionary<Mod, ModItem> OnModToggled(object sender, EventArgs e) {
-      var modListView = GetModListView();
-      var onModToggledMethod = modListView.GetType()
-          .GetMethod("OnModToggled", BindingFlags.Instance | BindingFlags.NonPublic);
-      if (onModToggledMethod == null) {
-        throw new Exception($"Mod items field named {ModItemsFieldName} "
-                   + $"wasn't found in {modListView.GetType().Name}");
-      }
-      return (Dictionary<Mod, ModItem>)onModToggledMethod.Invoke(modListView, new object[] { sender, e });
-    }
-
-    private ModListView GetModListView() {
-      var modListViewField = _modManagerBox.GetType()
-          .GetField(ModListViewFieldName, BindingFlags.Instance | BindingFlags.NonPublic);
-      if (modListViewField == null) {
-        throw new Exception($"{nameof(ModListView)} field named {ModListViewFieldName} "
-                   + $"wasn't found in {_modManagerBox.GetType().Name}");
-      }
-      return (ModListView)modListViewField.GetValue(_modManagerBox);
     }
 
     private void Initialize(ModItem modItem) {
@@ -93,9 +51,19 @@ namespace Mods.SteamUpdateButtons {
           _ => button.ToggleDisplayStyle(
               _steamWorkshopModsProvider.IsUpdatable(modItem.Mod.ModDirectory)));
       button.RegisterCallback<ClickEvent>(ce => {
-        Debug.Log(DateTime.Now.ToString("HH:mm:ss.fff") + ": SteamUpdateButtons.Update: " + modItem.Mod.DisplayName);
+        Debug.Log(DateTime.Now.ToString("HH:mm:ss ") + "Steam Update Buttons: Updating: " + modItem.Mod.DisplayName);
         _steamWorkshopModsProvider.UpdateModDirectory(modItem.Mod.ModDirectory);
       });
+    }
+
+    private void SteamWorkshopModsProvider_DownloadComplete(object sender, EventArgs e) {
+      _modManagerBox.GetModListView().OnModToggled(this, EventArgs.Empty);  // show restartWarning
+      foreach (var kv in _modManagerBox.GetModListView().GetModItems()) {
+        if (kv.Key.ModDirectory.IsUserMod) {
+          continue;
+        }
+        Update(kv.Value);
+      }
     }
 
     private void Update(ModItem modItem) {

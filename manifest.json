@@ -1,8 +1,8 @@
 {
   "Name": "Steam Update Buttons",
-  "Version": "0.0.9",
+  "Version": "0.1.0",
   "Id": "SteamUpdateButtons",
-  "MinimumGameVersion": "0.6.1.0",
+  "MinimumGameVersion": "0.6.9.0",
   "Description": "Adds buttons to allow Steam mods to be updated from the Mods menu",
   "RequiredMods": [
      {

@@ -14,6 +14,7 @@ namespace Mods.SteamUpdateButtons.SteamWorkshopModDownloading {
     private readonly ModLoader _modLoader;
     private readonly Dictionary<string, Tuple<ContentDirectory, SteamWorkshopItem>> _items;
     public event EventHandler DownloadComplete;
+    public event EventHandler RefreshComplete;
 
     public SteamWorkshopModsProvider(SteamManager steamManager, SteamWorkshopContentProvider steamWorkshopContentProvider, ModLoader modLoader) : base(steamWorkshopContentProvider, modLoader) {
       _steamManager = steamManager;
@@ -45,9 +46,11 @@ namespace Mods.SteamUpdateButtons.SteamWorkshopModDownloading {
       var request = new SteamWorkshopQueryRequest(subscribedFiles);
       var requestor = new SteamWorkshopQueryRequester();
 
-      Debug.Log(DateTime.Now.ToString("HH:mm:ss.fff") + " Steam workshop items:");
+      Debug.Log(DateTime.Now.ToString("HH:mm:ss ") + "Steam Update Buttons: Refreshing workshop items");
+      var start = DateTime.Now;
       requestor.Query(request, (response) => {
-        Debug.Log(DateTime.Now.ToString("HH:mm:ss.fff") + " result = " + response.ResultMessage.Replace("k_EResult", ""));
+        var duration = DateTime.Now - start;
+        Debug.Log(DateTime.Now.ToString("HH:mm:ss ") + "Steam Update Buttons: result = " + response.ResultMessage.Replace("k_EResult", "") + " in " + duration);
         if (response.Successful) {
           foreach (var item in response.Items) {
             var contentDirectory = detailsById[item.ItemId];
@@ -60,18 +63,19 @@ namespace Mods.SteamUpdateButtons.SteamWorkshopModDownloading {
             } else {
               state = "Equal";
             }
-            Debug.Log(DateTime.Now.ToString("HH:mm:ss.fff") + " - [" + state + "] " + item.ItemId + "/" + item.Name + ", Server=" + item.TimeUpdated.ToLocalTime().ToString("o") + ", Local=" + contentDirectory.TimeUpdated.ToLocalTime().ToString("o"));
+            Debug.Log("- [" + state + "] " + item.ItemId + "/" + item.Name + ", Server=" + item.TimeUpdated.ToLocalTime().ToString("o") + ", Local=" + contentDirectory.TimeUpdated.ToLocalTime().ToString("o"));
 
             _items[contentDirectory.Folder] = new Tuple<ContentDirectory, SteamWorkshopItem>(contentDirectory, item);
           }
         }
+        RefreshComplete?.Invoke(this, EventArgs.Empty);
         callback?.Invoke();
       });
     }
 
     private readonly DateTime UnixEpoch = DateTimeOffset.FromUnixTimeSeconds(0).UtcDateTime;
     public bool IsAvailable(ModDirectory directory) {
-      if (_items.TryGetValue(directory.Path, out var t)) {
+      if (_items.TryGetValue(directory.OriginPath, out var t)) {
         t.Deconstruct(out var contentDirectory, out var workshopItem);
         return workshopItem.TimeUpdated > UnixEpoch;
       }
@@ -79,7 +83,7 @@ namespace Mods.SteamUpdateButtons.SteamWorkshopModDownloading {
     }
 
     public bool IsUpdatable(ModDirectory directory) {
-      if (_items.TryGetValue(directory.Path, out var t)) {
+      if (_items.TryGetValue(directory.OriginPath, out var t)) {
         t.Deconstruct(out var contentDirectory, out var workshopItem);
         return contentDirectory.TimeUpdated < workshopItem.TimeUpdated;
       }
@@ -87,7 +91,7 @@ namespace Mods.SteamUpdateButtons.SteamWorkshopModDownloading {
     }
 
     public void UpdateModDirectory(ModDirectory directory) {
-      _steamWorkshopContentProvider.UpdateContentDirectory(directory.Path);
+      _steamWorkshopContentProvider.UpdateContentDirectory(directory.OriginPath);
     }
   }
 }

@@ -21,11 +21,21 @@ namespace Mods.SteamUpdateButtons.SteamWorkshop {
       // SteamUGC.SetReturnMetadata(query, true);
     }
 
+#if TEST
+    static int testCounter;
+#endif
+
     private static void OnQueryCompleted(UGCQueryHandle_t query, SteamUGCQueryCompleted_t result, bool ioFailure, Action<SteamWorkshopQueryResponse> queryCallback, SteamWorkshopQueryRequest request) {
       SteamWorkshopQueryResponse response = new SteamWorkshopQueryResponse(request, ioFailure ? EResult.k_EResultIOFailure : result.m_eResult);
       if (!ioFailure && result.m_eResult == EResult.k_EResultOK) {
         for (uint i = 0; i < result.m_unNumResultsReturned; ++i) {
           var r = SteamUGC.GetQueryUGCResult(query, i, out SteamUGCDetails_t details);
+#if TEST
+          if (testCounter < 3) {
+            testCounter++;
+            details.m_rtimeUpdated *= i;
+          }
+#endif
           SteamWorkshopItem item = new SteamWorkshopItem(
             (ulong)details.m_nPublishedFileId,
             details.m_rgchTitle,
