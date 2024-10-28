@@ -55,15 +55,13 @@ namespace Mods.SteamUpdateButtons.SteamWorkshopModDownloading {
           foreach (var item in response.Items) {
             var contentDirectory = detailsById[item.ItemId];
 
-            string state;
             if (item.TimeUpdated > contentDirectory.TimeUpdated) {
-              state = "Newer";
+              Debug.Log("- [Newer] " + item.ItemId + "/" + item.Name + ", Server=" + item.TimeUpdated.ToLocalTime().ToString("o") + ", Local=" + contentDirectory.TimeUpdated.ToLocalTime().ToString("o"));
             } else if (item.TimeUpdated < contentDirectory.TimeUpdated) {
-              state = "Older";
+              Debug.Log("- [Older] " + item.ItemId + "/" + item.Name + ", Server=" + item.TimeUpdated.ToLocalTime().ToString("o") + ", Local=" + contentDirectory.TimeUpdated.ToLocalTime().ToString("o"));
             } else {
-              state = "Equal";
+              Debug.Log("- [Equal] " + item.ItemId + "/" + item.Name + ", Server & Local=" + item.TimeUpdated.ToLocalTime().ToString("o"));
             }
-            Debug.Log("- [" + state + "] " + item.ItemId + "/" + item.Name + ", Server=" + item.TimeUpdated.ToLocalTime().ToString("o") + ", Local=" + contentDirectory.TimeUpdated.ToLocalTime().ToString("o"));
 
             _items[contentDirectory.Folder] = new Tuple<ContentDirectory, SteamWorkshopItem>(contentDirectory, item);
           }

@@ -72,6 +72,10 @@
       <HintPath>Timberborn\Timberborn_Data\Managed\Timberborn.CoreUI.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="Timberborn.Localization">
+      <HintPath>Timberborn\Timberborn_Data\Managed\Timberborn.Localization.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
     <Reference Include="Timberborn.MainMenuModdingUI">
       <HintPath>Timberborn\Timberborn_Data\Managed\Timberborn.MainMenuModdingUI.dll</HintPath>
       <Private>false</Private>
@@ -112,6 +116,10 @@
       <HintPath>Timberborn\Timberborn_Data\Managed\Timberborn.SteamWorkshopModDownloading.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="Timberborn.TooltipSystem">
+      <HintPath>Timberborn\Timberborn_Data\Managed\Timberborn.TooltipSystem.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
     <Reference Include="TimberApi.UIBuilderSystem">
       <HintPath>TimberApi\core\TimberApi.UIBuilderSystem.dll</HintPath>
       <Private>false</Private>
@@ -119,22 +127,23 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ModItemUpdateInitializer.cs" />
-    <Compile Include="SteamUpdaterConfigurator.cs" />
-    <Compile Include="UpdateButton.cs" />
+    <Compile Include="MainMenuModdingUI\ModManagerBoxExtensions.cs" />
+    <Compile Include="ModdingUI\ModListViewExtensions.cs" />
+    <Compile Include="SteamWorkshopContent\ContentDirectory.cs" />
+    <Compile Include="SteamWorkshopContent\SteamWorkshopContentProvider.cs" />
+    <Compile Include="SteamWorkshopModDownloading\SteamWorkshopModsProvider.cs" />
+    <Compile Include="SteamWorkshop\SteamWorkshopItem.cs" />
     <Compile Include="SteamWorkshop\SteamWorkshopQueryHandle.cs" />
     <Compile Include="SteamWorkshop\SteamWorkshopQueryRequest.cs" />
     <Compile Include="SteamWorkshop\SteamWorkshopQueryRequester.cs" />
     <Compile Include="SteamWorkshop\SteamWorkshopQueryResponse.cs" />
-    <Compile Include="SteamWorkshopModDownloading\SteamWorkshopModsProvider.cs" />
-    <Compile Include="SteamWorkshopContent\SteamWorkshopContentProvider.cs" />
-    <Compile Include="SteamWorkshop\SteamWorkshopItem.cs" />
-    <Compile Include="SteamWorkshopContent\ContentDirectory.cs" />
-    <Compile Include="UnavailableImage.cs" />
+    <Compile Include="ModItemUpdateInitializer.cs" />
+    <Compile Include="ModManagerBoxInitializer.cs" />
     <Compile Include="ModManagerButtonIndicatorInitializer.cs" />
+    <Compile Include="SteamUpdaterConfigurator.cs" />
+    <Compile Include="UnavailableImage.cs" />
     <Compile Include="UpdateAvailableImage.cs" />
-    <Compile Include="MainMenuModdingUI\ModManagerBoxExtensions.cs" />
-    <Compile Include="ModdingUI\ModListViewExtensions.cs" />
+    <Compile Include="UpdateButton.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="manifest.json">
@@ -147,6 +156,11 @@
     <Folder Include="SteamWorkshopContent\" />
     <Folder Include="MainMenuModdingUI\" />
     <Folder Include="ModdingUI\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Localizations\enUS.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -4,6 +4,7 @@ using Timberborn.MainMenuModdingUI;
 using Timberborn.Modding;
 using Timberborn.ModdingUI;
 using Timberborn.SingletonSystem;
+using Timberborn.TooltipSystem;
 using UnityEngine;
 using UnityEngine.UIElements;
 using TimberApi.UIBuilderSystem;
@@ -18,16 +19,19 @@ namespace Mods.SteamUpdateButtons {
     private readonly ModLoader _modLoader;
     private readonly ModManagerBox _modManagerBox;
     private readonly SteamWorkshopModsProvider _steamWorkshopModsProvider;
+    private readonly ITooltipRegistrar _tooltipRegistrar;
 
     public ModItemUpdateInitializer(UIBuilder uiBuilder,
                                     ModLoader modLoader,
                                     ModManagerBox modManagerBox,
-                                    SteamWorkshopModsProvider steamWorkshopModsProvider) {
+                                    SteamWorkshopModsProvider steamWorkshopModsProvider,
+                                    ITooltipRegistrar tooltipRegistrar) {
       _uiBuilder = uiBuilder;
       _modLoader = modLoader;
       _modManagerBox = modManagerBox;
       _steamWorkshopModsProvider = steamWorkshopModsProvider;
       _steamWorkshopModsProvider.DownloadComplete += SteamWorkshopModsProvider_DownloadComplete;
+      _tooltipRegistrar = tooltipRegistrar;
     }
 
     public void Load() {
@@ -46,6 +50,7 @@ namespace Mods.SteamUpdateButtons {
           _ => image.ToggleDisplayStyle(
               !_steamWorkshopModsProvider.IsAvailable(modItem.Mod.ModDirectory)));
       var button = _uiBuilder.Build<UpdateButton>("UpdateModButton");
+      _tooltipRegistrar.RegisterLocalizable(button, "SteamUpdateButtons.UpdateMod");
       modItem.Root.Add(button);
       button.RegisterCallback<AttachToPanelEvent>(
           _ => button.ToggleDisplayStyle(

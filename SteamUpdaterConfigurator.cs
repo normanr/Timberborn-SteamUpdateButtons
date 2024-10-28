@@ -8,6 +8,7 @@ namespace Mods.SteamUpdateButtons {
 
     public void Configure(IContainerDefinition containerDefinition) {
       containerDefinition.Bind<ModManagerButtonIndicatorInitializer>().AsSingleton();
+      containerDefinition.Bind<ModManagerBoxInitializer>().AsSingleton();
       containerDefinition.Bind<ModItemUpdateInitializer>().AsSingleton();
       containerDefinition.Bind<SteamWorkshopContentProvider>().AsSingleton();
       containerDefinition.Bind<SteamWorkshopModsProvider>().AsSingleton();
