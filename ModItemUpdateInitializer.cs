@@ -9,6 +9,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using TimberApi.UIBuilderSystem;
 using Mods.SteamUpdateButtons.MainMenuModdingUI;
+using Mods.SteamUpdateButtons.Modding;
 using Mods.SteamUpdateButtons.ModdingUI;
 using Mods.SteamUpdateButtons.SteamWorkshopModDownloading;
 
@@ -16,19 +17,19 @@ namespace Mods.SteamUpdateButtons {
   internal class ModItemUpdateInitializer : ILoadableSingleton {
 
     private readonly UIBuilder _uiBuilder;
-    private readonly ModLoader _modLoader;
     private readonly ModManagerBox _modManagerBox;
+    private readonly ModRepository _modRepository;
     private readonly SteamWorkshopModsProvider _steamWorkshopModsProvider;
     private readonly ITooltipRegistrar _tooltipRegistrar;
 
     public ModItemUpdateInitializer(UIBuilder uiBuilder,
-                                    ModLoader modLoader,
                                     ModManagerBox modManagerBox,
+                                    ModRepository modRepository,
                                     SteamWorkshopModsProvider steamWorkshopModsProvider,
                                     ITooltipRegistrar tooltipRegistrar) {
       _uiBuilder = uiBuilder;
-      _modLoader = modLoader;
       _modManagerBox = modManagerBox;
+      _modRepository = modRepository;
       _steamWorkshopModsProvider = steamWorkshopModsProvider;
       _steamWorkshopModsProvider.DownloadComplete += SteamWorkshopModsProvider_DownloadComplete;
       _tooltipRegistrar = tooltipRegistrar;
@@ -72,10 +73,14 @@ namespace Mods.SteamUpdateButtons {
     }
 
     private void Update(ModItem modItem) {
-      if (_modLoader.TryLoadMod(modItem.Mod.ModDirectory, out var mod)) {
-        var version = modItem.ModManifest.Version.AsFormattedString();
-        if (version != mod.Manifest.Version.AsFormattedString()) {
-          version += " → " + mod.Manifest.Version.AsFormattedString();
+      var directory = modItem.Mod.ModDirectory;
+      if (_modRepository.TryGetModDirectory(directory, out var versionedDirectory)) {
+        directory = versionedDirectory;
+      }
+      if (_steamWorkshopModsProvider.TryLoadModManifest(directory, out var manifest)) {
+        var version = modItem.ModManifest.Version.Formatted;
+        if (version != manifest.Version.Formatted) {
+          version += " → " + manifest.Version.Formatted;
           modItem.Root.Q<Label>("ModVersion").text = version;
         }
       }

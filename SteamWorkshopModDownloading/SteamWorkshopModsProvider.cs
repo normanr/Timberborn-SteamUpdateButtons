@@ -88,6 +88,15 @@ namespace Mods.SteamUpdateButtons.SteamWorkshopModDownloading {
       return false;
     }
 
+    public bool TryLoadModManifest(ModDirectory directory, out ModManifest manifest) {
+      if (_modLoader.TryLoadMod(directory, out var mod)) {
+        manifest = mod.Manifest;
+        return true;
+      }
+      manifest = null;
+      return false;
+    }
+
     public void UpdateModDirectory(ModDirectory directory) {
       _steamWorkshopContentProvider.UpdateContentDirectory(directory.OriginPath);
     }

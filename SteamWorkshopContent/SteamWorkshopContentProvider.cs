@@ -54,9 +54,6 @@ namespace Mods.SteamUpdateButtons.SteamWorkshopContent {
       }
       var r = SteamUGC.DownloadItem((PublishedFileId_t)id, true);
       Debug.Log(DateTime.Now.ToString("HH:mm:ss ") + "Steam Update Buttons: SteamUGC.DownloadItem(" + id + ") == " + r);
-#if TEST
-      DownloadComplete?.Invoke(this, EventArgs.Empty);
-#endif
     }
 
     private void OnDownloadItemResult(DownloadItemResult_t pCallback) {

@@ -40,12 +40,20 @@
     <LangVersion>Latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="mscorlib">
+      <HintPath>Timberborn\Timberborn_Data\Managed\mscorlib.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
     <Reference Include="System">
       <HintPath>Timberborn\Timberborn_Data\Managed\System.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="System.Collections.Immutable">
       <HintPath>Timberborn\Timberborn_Data\Managed\System.Collections.Immutable.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="System.Memory">
+      <HintPath>Timberborn\Timberborn_Data\Managed\System.Memory.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="com.rlabrecque.steamworks.net">
@@ -120,15 +128,24 @@
       <HintPath>Timberborn\Timberborn_Data\Managed\Timberborn.TooltipSystem.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="Timberborn.Versioning">
+      <HintPath>Timberborn\Timberborn_Data\Managed\Timberborn.Versioning.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
     <Reference Include="TimberApi.UIBuilderSystem">
       <HintPath>TimberApi\core\TimberApi.UIBuilderSystem.dll</HintPath>
       <Private>false</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="MainMenuModdingUI\ModManagerBoxExtensions.cs" />
+    <Compile Include="ModItemUpdateInitializer.cs" />
+    <Compile Include="ModManagerBoxInitializer.cs" />
+    <Compile Include="ModManagerButtonIndicatorInitializer.cs" />
     <Compile Include="ModdingUI\ModListViewExtensions.cs" />
+    <Compile Include="Modding\ModRepositoryExtensions.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SteamUpdaterConfigurator.cs" />
     <Compile Include="SteamWorkshopContent\ContentDirectory.cs" />
     <Compile Include="SteamWorkshopContent\SteamWorkshopContentProvider.cs" />
     <Compile Include="SteamWorkshopModDownloading\SteamWorkshopModsProvider.cs" />
@@ -137,10 +154,6 @@
     <Compile Include="SteamWorkshop\SteamWorkshopQueryRequest.cs" />
     <Compile Include="SteamWorkshop\SteamWorkshopQueryRequester.cs" />
     <Compile Include="SteamWorkshop\SteamWorkshopQueryResponse.cs" />
-    <Compile Include="ModItemUpdateInitializer.cs" />
-    <Compile Include="ModManagerBoxInitializer.cs" />
-    <Compile Include="ModManagerButtonIndicatorInitializer.cs" />
-    <Compile Include="SteamUpdaterConfigurator.cs" />
     <Compile Include="UnavailableImage.cs" />
     <Compile Include="UpdateAvailableImage.cs" />
     <Compile Include="UpdateButton.cs" />
@@ -151,11 +164,12 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="SteamWorkshop\" />
-    <Folder Include="SteamWorkshopModDownloading\" />
-    <Folder Include="SteamWorkshopContent\" />
     <Folder Include="MainMenuModdingUI\" />
     <Folder Include="ModdingUI\" />
+    <Folder Include="Modding\" />
+    <Folder Include="SteamWorkshopContent\" />
+    <Folder Include="SteamWorkshopModDownloading\" />
+    <Folder Include="SteamWorkshop\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Localizations\enUS.csv">

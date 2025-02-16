@@ -14,18 +14,15 @@ using Mods.SteamUpdateButtons.SteamWorkshopModDownloading;
 namespace Mods.SteamUpdateButtons {
   public class ModManagerBoxInitializer : ILoadableSingleton {
     private readonly UIBuilder _uiBuilder;
-    private readonly ModLoader _modLoader;
     private readonly ModManagerBox _modManagerBox;
     private readonly SteamWorkshopModsProvider _steamWorkshopModsProvider;
     private readonly ITooltipRegistrar _tooltipRegistrar;
 
     public ModManagerBoxInitializer(UIBuilder uiBuilder,
-                                    ModLoader modLoader,
                                     ModManagerBox modManagerBox,
                                     SteamWorkshopModsProvider steamWorkshopModsProvider,
                                     ITooltipRegistrar tooltipRegistrar) {
       _uiBuilder = uiBuilder;
-      _modLoader = modLoader;
       _modManagerBox = modManagerBox;
       _steamWorkshopModsProvider = steamWorkshopModsProvider;
       _tooltipRegistrar = tooltipRegistrar;
