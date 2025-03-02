@@ -133,7 +133,7 @@
       <Private>false</Private>
     </Reference>
     <Reference Include="TimberApi.UIBuilderSystem">
-      <HintPath>TimberApi\core\TimberApi.UIBuilderSystem.dll</HintPath>
+      <HintPath>TimberApi.UIBuilder\TimberApi.UIBuilderSystem.dll</HintPath>
       <Private>false</Private>
     </Reference>
   </ItemGroup>

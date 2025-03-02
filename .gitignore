@@ -2,6 +2,6 @@ bin/
 obj/
 zips/
 Timberborn
-TimberApi
+TimberApi.UIBuilder
 *.csproj.user
 .vs/*/xs/UserPrefs.xml

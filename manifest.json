@@ -6,8 +6,8 @@
   "Description": "Adds buttons to allow Steam mods to be updated from the Mods menu",
   "RequiredMods": [
      {
-      "Id": "TimberApi",
-      "MinimumVersion": "0.7.9.1"
+      "Id": "TimberApi.UIBuilder",
+      "MinimumVersion": "1.0.0.1"
     }
   ]
 }
