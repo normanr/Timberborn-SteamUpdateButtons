@@ -31,10 +31,12 @@ namespace Mods.SteamUpdateButtons.SteamWorkshopContent {
       }
       foreach (PublishedFileId_t subscribedItem in GetSubscribedItems()) {
         if (SteamUGC.GetItemInstallInfo(subscribedItem, out var _, out var pchFolder, PathBufferSize, out var punTimeStamp)) {
+          var state = (EItemState)SteamUGC.GetItemState(subscribedItem);
           yield return new ContentDirectory(
             (ulong)subscribedItem,
             pchFolder,
-            DateTimeOffset.FromUnixTimeSeconds(punTimeStamp).UtcDateTime
+            DateTimeOffset.FromUnixTimeSeconds(punTimeStamp).UtcDateTime,
+            (state & EItemState.k_EItemStateDownloadPending) == EItemState.k_EItemStateDownloadPending
           );
         }
       }

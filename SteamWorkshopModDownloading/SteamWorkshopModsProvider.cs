@@ -56,11 +56,11 @@ namespace Mods.SteamUpdateButtons.SteamWorkshopModDownloading {
             var contentDirectory = detailsById[item.ItemId];
 
             if (item.TimeUpdated > contentDirectory.TimeUpdated) {
-              Debug.Log("- [Newer] " + item.ItemId + "/" + item.Name + ", Server=" + item.TimeUpdated.ToLocalTime().ToString("o") + ", Local=" + contentDirectory.TimeUpdated.ToLocalTime().ToString("o"));
+              Debug.Log("- [Newer] " + item.ItemId + "/" + item.Name + ", Local=" + contentDirectory.TimeUpdated.ToLocalTime().ToString("o") + ", Server=" + item.TimeUpdated.ToLocalTime().ToString("o"));
             } else if (item.TimeUpdated < contentDirectory.TimeUpdated) {
-              Debug.Log("- [Older] " + item.ItemId + "/" + item.Name + ", Server=" + item.TimeUpdated.ToLocalTime().ToString("o") + ", Local=" + contentDirectory.TimeUpdated.ToLocalTime().ToString("o"));
+              Debug.Log("- [Older] " + item.ItemId + "/" + item.Name + ", Local=" + contentDirectory.TimeUpdated.ToLocalTime().ToString("o") + ", Server=" + item.TimeUpdated.ToLocalTime().ToString("o"));
             } else {
-              Debug.Log("- [Equal] " + item.ItemId + "/" + item.Name + ", Server & Local=" + item.TimeUpdated.ToLocalTime().ToString("o"));
+              Debug.Log("- [Equal] " + item.ItemId + "/" + item.Name + ", Local & Server=" + item.TimeUpdated.ToLocalTime().ToString("o"));
             }
 
             _items[contentDirectory.Folder] = new Tuple<ContentDirectory, SteamWorkshopItem>(contentDirectory, item);
@@ -84,6 +84,14 @@ namespace Mods.SteamUpdateButtons.SteamWorkshopModDownloading {
       if (_items.TryGetValue(directory.OriginPath, out var t)) {
         t.Deconstruct(out var contentDirectory, out var workshopItem);
         return contentDirectory.TimeUpdated < workshopItem.TimeUpdated;
+      }
+      return false;
+    }
+
+    public bool IsDownloadPending(ModDirectory directory) {
+      if (_items.TryGetValue(directory.OriginPath, out var t)) {
+        t.Deconstruct(out var contentDirectory, out var workshopItem);
+        return contentDirectory.DownloadPending;
       }
       return false;
     }

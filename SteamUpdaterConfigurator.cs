@@ -15,6 +15,7 @@ namespace Mods.SteamUpdateButtons {
       containerDefinition.Bind<UpdateAvailableImage>().AsTransient();
       containerDefinition.Bind<UpdateButton>().AsTransient();
       containerDefinition.Bind<UnavailableImage>().AsTransient();
+      containerDefinition.Bind<DownloadPendingImage>().AsTransient();
     }
 
   }

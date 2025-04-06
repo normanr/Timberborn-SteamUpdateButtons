@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Linq;
+using Timberborn.CoreUI;
 using Timberborn.MainMenuModdingUI;
-using Timberborn.Modding;
 using Timberborn.SingletonSystem;
 using Timberborn.TooltipSystem;
 using UnityEngine;
@@ -14,18 +13,15 @@ using Mods.SteamUpdateButtons.SteamWorkshopModDownloading;
 namespace Mods.SteamUpdateButtons {
   public class ModManagerBoxInitializer : ILoadableSingleton {
     private readonly UIBuilder _uiBuilder;
-    private readonly ModLoader _modLoader;
     private readonly ModManagerBox _modManagerBox;
     private readonly SteamWorkshopModsProvider _steamWorkshopModsProvider;
     private readonly ITooltipRegistrar _tooltipRegistrar;
 
     public ModManagerBoxInitializer(UIBuilder uiBuilder,
-                                    ModLoader modLoader,
                                     ModManagerBox modManagerBox,
                                     SteamWorkshopModsProvider steamWorkshopModsProvider,
                                     ITooltipRegistrar tooltipRegistrar) {
       _uiBuilder = uiBuilder;
-      _modLoader = modLoader;
       _modManagerBox = modManagerBox;
       _steamWorkshopModsProvider = steamWorkshopModsProvider;
       _tooltipRegistrar = tooltipRegistrar;
@@ -40,12 +36,18 @@ namespace Mods.SteamUpdateButtons {
 
     private void UpdateAll(ClickEvent evt) {
       Debug.Log(DateTime.Now.ToString("HH:mm:ss ") + "Steam Update Buttons: Updating all mods");
-      var updatableMods = _modManagerBox.GetModListView().GetModItems().Keys.Where((Mod mod) =>
-        !mod.ModDirectory.IsUserMod &&
-        _steamWorkshopModsProvider.IsUpdatable(mod.ModDirectory));
+      foreach (var pair in _modManagerBox.GetModListView().GetModItems()) {
+        // pair.Deconstruct(out var mod, out var modItem);
+        var mod = pair.Key;
+        var modItem = pair.Value;
+        if (mod.ModDirectory.IsUserMod) continue;
+        if (!_steamWorkshopModsProvider.IsUpdatable(mod.ModDirectory)) continue;
 
-      foreach (var mod in updatableMods) {
         Debug.Log(DateTime.Now.ToString("HH:mm:ss ") + "Steam Update Buttons: Updating: " + mod.DisplayName);
+        var downloadPendingImage = modItem.Root.Q<VisualElement>("DownloadPendingImage");
+        var button = modItem.Root.Q<VisualElement>("UpdateModButton");
+        button.ToggleDisplayStyle(false);
+        downloadPendingImage.ToggleDisplayStyle(true);
         _steamWorkshopModsProvider.UpdateModDirectory(mod.ModDirectory);
       }
     }
