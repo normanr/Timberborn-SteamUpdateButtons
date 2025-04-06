@@ -63,9 +63,10 @@ namespace Mods.SteamUpdateButtons {
               _steamWorkshopModsProvider.IsUpdatable(modItem.Mod.ModDirectory)));
       button.RegisterCallback<ClickEvent>(ce => {
         Debug.Log(DateTime.Now.ToString("HH:mm:ss ") + "Steam Update Buttons: Updating: " + modItem.Mod.DisplayName);
-        button.ToggleDisplayStyle(false);
-        downloadPendingImage.ToggleDisplayStyle(true);
-        _steamWorkshopModsProvider.UpdateModDirectory(modItem.Mod.ModDirectory);
+        if (_steamWorkshopModsProvider.UpdateModDirectory(modItem.Mod.ModDirectory)) {
+          button.ToggleDisplayStyle(false);
+          downloadPendingImage.ToggleDisplayStyle(true);
+        }
       });
     }
 

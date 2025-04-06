@@ -44,11 +44,12 @@ namespace Mods.SteamUpdateButtons {
         if (!_steamWorkshopModsProvider.IsUpdatable(mod.ModDirectory)) continue;
 
         Debug.Log(DateTime.Now.ToString("HH:mm:ss ") + "Steam Update Buttons: Updating: " + mod.DisplayName);
-        var downloadPendingImage = modItem.Root.Q<VisualElement>("DownloadPendingImage");
-        var button = modItem.Root.Q<VisualElement>("UpdateModButton");
-        button.ToggleDisplayStyle(false);
-        downloadPendingImage.ToggleDisplayStyle(true);
-        _steamWorkshopModsProvider.UpdateModDirectory(mod.ModDirectory);
+        if (_steamWorkshopModsProvider.UpdateModDirectory(mod.ModDirectory)) {
+          var downloadPendingImage = modItem.Root.Q<VisualElement>("DownloadPendingImage");
+          var button = modItem.Root.Q<VisualElement>("UpdateModButton");
+          button.ToggleDisplayStyle(false);
+          downloadPendingImage.ToggleDisplayStyle(true);
+        }
       }
     }
   }

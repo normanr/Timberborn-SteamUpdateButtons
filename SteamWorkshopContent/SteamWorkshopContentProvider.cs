@@ -49,7 +49,7 @@ namespace Mods.SteamUpdateButtons.SteamWorkshopContent {
       return array;
     }
 
-    public void UpdateContentDirectory(string contentDirectory) {
+    public bool UpdateContentDirectory(string contentDirectory) {
       // TODO, HACK: Match this with ItemInstallInfo.Folder instead
       if (!uint.TryParse(Path.GetFileName(contentDirectory), out uint id)) {
         throw new Exception("Failed to parse as uint: " + Path.GetFileName(contentDirectory));
@@ -59,6 +59,7 @@ namespace Mods.SteamUpdateButtons.SteamWorkshopContent {
 #if TEST
       DownloadComplete?.Invoke(this, EventArgs.Empty);
 #endif
+      return r;
     }
 
     private void OnDownloadItemResult(DownloadItemResult_t pCallback) {
