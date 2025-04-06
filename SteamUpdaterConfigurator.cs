@@ -23,6 +23,7 @@ namespace Mods.SteamUpdateButtons {
       Bind<UpdateAvailableImage>().AsTransient();
       Bind<UpdateButton>().AsTransient();
       Bind<UnavailableImage>().AsTransient();
+      Bind<DownloadPendingImage>().AsTransient();
     }
 
   }

@@ -45,19 +45,27 @@ namespace Mods.SteamUpdateButtons {
     }
 
     private void Initialize(ModItem modItem) {
-      var image = _uiBuilder.Build<UnavailableImage>("UnavailableImage");
-      modItem.Root.Add(image);
-      image.RegisterCallback<AttachToPanelEvent>(
-          _ => image.ToggleDisplayStyle(
+      var unavailableImage = _uiBuilder.Build<UnavailableImage>("UnavailableImage");
+      modItem.Root.Add(unavailableImage);
+      unavailableImage.RegisterCallback<AttachToPanelEvent>(
+          _ => unavailableImage.ToggleDisplayStyle(
               !_steamWorkshopModsProvider.IsAvailable(modItem.Mod.ModDirectory)));
+      var downloadPendingImage = _uiBuilder.Build<DownloadPendingImage>("DownloadPendingImage");
+      modItem.Root.Add(downloadPendingImage);
+      downloadPendingImage.RegisterCallback<AttachToPanelEvent>(
+          _ => downloadPendingImage.ToggleDisplayStyle(
+              _steamWorkshopModsProvider.IsDownloadPending(modItem.Mod.ModDirectory)));
       var button = _uiBuilder.Build<UpdateButton>("UpdateModButton");
       _tooltipRegistrar.RegisterLocalizable(button, "SteamUpdateButtons.UpdateMod");
       modItem.Root.Add(button);
       button.RegisterCallback<AttachToPanelEvent>(
           _ => button.ToggleDisplayStyle(
+              !_steamWorkshopModsProvider.IsDownloadPending(modItem.Mod.ModDirectory) &&
               _steamWorkshopModsProvider.IsUpdatable(modItem.Mod.ModDirectory)));
       button.RegisterCallback<ClickEvent>(ce => {
         Debug.Log(DateTime.Now.ToString("HH:mm:ss ") + "Steam Update Buttons: Updating: " + modItem.Mod.DisplayName);
+        button.ToggleDisplayStyle(false);
+        downloadPendingImage.ToggleDisplayStyle(true);
         _steamWorkshopModsProvider.UpdateModDirectory(modItem.Mod.ModDirectory);
       });
     }
@@ -84,11 +92,16 @@ namespace Mods.SteamUpdateButtons {
           modItem.Root.Q<Label>("ModVersion").text = version;
         }
       }
-      var image = modItem.Root.Q<VisualElement>("UnavailableImage");
-      image.ToggleDisplayStyle(
+      var unavailableImage = modItem.Root.Q<VisualElement>("UnavailableImage");
+      unavailableImage.ToggleDisplayStyle(
           !_steamWorkshopModsProvider.IsAvailable(modItem.Mod.ModDirectory));
+      var downloadPendingImage = modItem.Root.Q<VisualElement>("DownloadPendingImage");
+      bool downloadPending = _steamWorkshopModsProvider.IsDownloadPending(modItem.Mod.ModDirectory);
+      downloadPendingImage.ToggleDisplayStyle(
+          downloadPending);
       var button = modItem.Root.Q<VisualElement>("UpdateModButton");
       button.ToggleDisplayStyle(
+          !downloadPending &&
           _steamWorkshopModsProvider.IsUpdatable(modItem.Mod.ModDirectory));
     }
   }

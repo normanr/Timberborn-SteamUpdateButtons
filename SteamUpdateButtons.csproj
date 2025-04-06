@@ -157,6 +157,7 @@
     <Compile Include="UnavailableImage.cs" />
     <Compile Include="UpdateAvailableImage.cs" />
     <Compile Include="UpdateButton.cs" />
+    <Compile Include="DownloadPendingImage.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="manifest.json">
