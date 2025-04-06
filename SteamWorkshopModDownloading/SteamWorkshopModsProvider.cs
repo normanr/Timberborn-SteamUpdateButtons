@@ -105,8 +105,8 @@ namespace Mods.SteamUpdateButtons.SteamWorkshopModDownloading {
       return false;
     }
 
-    public void UpdateModDirectory(ModDirectory directory) {
-      _steamWorkshopContentProvider.UpdateContentDirectory(directory.OriginPath);
+    public bool UpdateModDirectory(ModDirectory directory) {
+      return _steamWorkshopContentProvider.UpdateContentDirectory(directory.OriginPath);
     }
   }
 }

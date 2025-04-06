@@ -49,13 +49,14 @@ namespace Mods.SteamUpdateButtons.SteamWorkshopContent {
       return array;
     }
 
-    public void UpdateContentDirectory(string contentDirectory) {
+    public bool UpdateContentDirectory(string contentDirectory) {
       // TODO, HACK: Match this with ItemInstallInfo.Folder instead
       if (!uint.TryParse(Path.GetFileName(contentDirectory), out uint id)) {
         throw new Exception("Failed to parse as uint: " + Path.GetFileName(contentDirectory));
       }
       var r = SteamUGC.DownloadItem((PublishedFileId_t)id, true);
       Debug.Log(DateTime.Now.ToString("HH:mm:ss ") + "Steam Update Buttons: SteamUGC.DownloadItem(" + id + ") == " + r);
+      return r;
     }
 
     private void OnDownloadItemResult(DownloadItemResult_t pCallback) {
