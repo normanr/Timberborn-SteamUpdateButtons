@@ -13,7 +13,7 @@ namespace Mods.SteamUpdateButtons.SteamWorkshopContent {
     private readonly SteamManager _steamManager;
 
     private Callback<DownloadItemResult_t> m_DownloadItemResult;
-    public event EventHandler DownloadComplete;
+    private readonly Dictionary<PublishedFileId_t, Action<bool>> _pendingDownloadCallbacks = [];
 
     public SteamWorkshopContentProvider(SteamManager steamManager) : base(steamManager) {
       _steamManager = steamManager;
@@ -49,19 +49,33 @@ namespace Mods.SteamUpdateButtons.SteamWorkshopContent {
       return array;
     }
 
-    public bool UpdateContentDirectory(string contentDirectory) {
+    public bool UpdateContentDirectory(string contentDirectory, Action<bool> callback) {
       // TODO, HACK: Match this with ItemInstallInfo.Folder instead
-      if (!uint.TryParse(Path.GetFileName(contentDirectory), out uint id)) {
+      if (!ulong.TryParse(Path.GetFileName(contentDirectory), out ulong id)) {
         throw new Exception("Failed to parse as uint: " + Path.GetFileName(contentDirectory));
       }
       var r = SteamUGC.DownloadItem((PublishedFileId_t)id, true);
       Debug.Log(DateTime.Now.ToString("HH:mm:ss ") + "Steam Update Buttons: SteamUGC.DownloadItem(" + id + ") == " + r);
+      if (r) {
+        _pendingDownloadCallbacks[(PublishedFileId_t)id] = callback;
+      }
       return r;
+    }
+
+    public bool GetDownloadProgress(string contentDirectory, out ulong downloaded, out ulong total) {
+      // TODO, HACK: Match this with ItemInstallInfo.Folder instead
+      if (!ulong.TryParse(Path.GetFileName(contentDirectory), out ulong id)) {
+        throw new Exception("Failed to parse as uint: " + Path.GetFileName(contentDirectory));
+      }
+      return SteamUGC.GetItemDownloadInfo((PublishedFileId_t)id, out downloaded, out total);
     }
 
     private void OnDownloadItemResult(DownloadItemResult_t pCallback) {
       Debug.Log(DateTime.Now.ToString("HH:mm:ss ") + "Steam Update Buttons: OnDownloadItemResult(" + pCallback.m_unAppID + ", " + pCallback.m_nPublishedFileId + ") = " + pCallback.m_eResult);
-      DownloadComplete?.Invoke(this, EventArgs.Empty);
+      if (_pendingDownloadCallbacks.TryGetValue(pCallback.m_nPublishedFileId, out var action)) {
+        _pendingDownloadCallbacks.Remove(pCallback.m_nPublishedFileId);
+        action(pCallback.m_eResult == EResult.k_EResultOK);
+      }
     }
   }
 }

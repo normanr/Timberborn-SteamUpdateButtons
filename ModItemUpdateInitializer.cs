@@ -12,15 +12,18 @@ using Mods.SteamUpdateButtons.MainMenuModdingUI;
 using Mods.SteamUpdateButtons.Modding;
 using Mods.SteamUpdateButtons.ModdingUI;
 using Mods.SteamUpdateButtons.SteamWorkshopModDownloading;
+using System.Collections.Generic;
 
 namespace Mods.SteamUpdateButtons {
-  internal class ModItemUpdateInitializer : ILoadableSingleton {
+  internal class ModItemUpdateInitializer : ILoadableSingleton, IUpdatableSingleton {
 
     private readonly UIBuilder _uiBuilder;
     private readonly ModManagerBox _modManagerBox;
     private readonly ModRepository _modRepository;
     private readonly SteamWorkshopModsProvider _steamWorkshopModsProvider;
     private readonly ITooltipRegistrar _tooltipRegistrar;
+
+    private readonly List<ModItem> _updatingMods = [];
 
     public ModItemUpdateInitializer(UIBuilder uiBuilder,
                                     ModManagerBox modManagerBox,
@@ -31,7 +34,6 @@ namespace Mods.SteamUpdateButtons {
       _modManagerBox = modManagerBox;
       _modRepository = modRepository;
       _steamWorkshopModsProvider = steamWorkshopModsProvider;
-      _steamWorkshopModsProvider.DownloadComplete += SteamWorkshopModsProvider_DownloadComplete;
       _tooltipRegistrar = tooltipRegistrar;
     }
 
@@ -41,6 +43,16 @@ namespace Mods.SteamUpdateButtons {
           continue;
         }
         Initialize(kv.Value);
+      }
+    }
+
+    public void UpdateSingleton() {
+      foreach (var modItem in _updatingMods) {
+        if (_steamWorkshopModsProvider.GetDownloadProgress(modItem.Mod.ModDirectory, out var downloaded, out var total) && total > 0) {
+          var version = modItem.ModManifest.Version.Formatted;
+          version += $" → {(float)downloaded / total:0%}";
+          modItem.Root.Q<Label>("ModVersion").text = version;
+        }
       }
     }
 
@@ -63,21 +75,23 @@ namespace Mods.SteamUpdateButtons {
               !_steamWorkshopModsProvider.IsDownloadPending(modItem.Mod.ModDirectory) &&
               _steamWorkshopModsProvider.IsUpdatable(modItem.Mod.ModDirectory)));
       button.RegisterCallback<ClickEvent>(ce => {
-        Debug.Log(DateTime.Now.ToString("HH:mm:ss ") + "Steam Update Buttons: Updating: " + modItem.Mod.DisplayName);
-        if (_steamWorkshopModsProvider.UpdateModDirectory(modItem.Mod.ModDirectory)) {
-          button.ToggleDisplayStyle(false);
-          downloadPendingImage.ToggleDisplayStyle(true);
-        }
+        UpdateMod(modItem);
       });
     }
 
-    private void SteamWorkshopModsProvider_DownloadComplete(object sender, EventArgs e) {
-      _modManagerBox.GetModListView().OnModToggled(this, EventArgs.Empty);  // show restartWarning
-      foreach (var kv in _modManagerBox.GetModListView().GetModItems()) {
-        if (kv.Key.ModDirectory.IsUserMod) {
-          continue;
-        }
-        Update(kv.Value);
+    public void UpdateMod(ModItem modItem) {
+      Debug.Log(DateTime.Now.ToString("HH:mm:ss ") + "Steam Update Buttons: Updating: " + modItem.Mod.DisplayName);
+      if (_steamWorkshopModsProvider.UpdateModDirectory(modItem.Mod.ModDirectory, r => {
+        Debug.Log(DateTime.Now.ToString("HH:mm:ss ") + "Steam Update Buttons: No longer updating: " + modItem.Mod.DisplayName);
+        _updatingMods.Remove(modItem);
+        _modManagerBox.GetModListView().OnModToggled(this, EventArgs.Empty);  // show restartWarning
+        Update(modItem);
+      })) {
+        var downloadPendingImage = modItem.Root.Q<VisualElement>("DownloadPendingImage");
+        var button = modItem.Root.Q<VisualElement>("UpdateModButton");
+        button.ToggleDisplayStyle(false);
+        downloadPendingImage.ToggleDisplayStyle(true);
+        _updatingMods.Add(modItem);
       }
     }
 
@@ -88,10 +102,8 @@ namespace Mods.SteamUpdateButtons {
       }
       if (_steamWorkshopModsProvider.TryLoadModManifest(directory, out var manifest)) {
         var version = modItem.ModManifest.Version.Formatted;
-        if (version != manifest.Version.Formatted) {
-          version += " → " + manifest.Version.Formatted;
-          modItem.Root.Q<Label>("ModVersion").text = version;
-        }
+        version += " → " + manifest.Version.Formatted;
+        modItem.Root.Q<Label>("ModVersion").text = version;
       }
       var unavailableImage = modItem.Root.Q<VisualElement>("UnavailableImage");
       unavailableImage.ToggleDisplayStyle(

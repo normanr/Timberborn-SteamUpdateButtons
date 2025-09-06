@@ -13,7 +13,6 @@ namespace Mods.SteamUpdateButtons.SteamWorkshopModDownloading {
     private readonly SteamWorkshopContentProvider _steamWorkshopContentProvider;
     private readonly ModLoader _modLoader;
     private readonly Dictionary<string, Tuple<ContentDirectory, SteamWorkshopItem>> _items;
-    public event EventHandler DownloadComplete;
     public event EventHandler RefreshComplete;
 
     public SteamWorkshopModsProvider(SteamManager steamManager, SteamWorkshopContentProvider steamWorkshopContentProvider, ModLoader modLoader) : base(steamWorkshopContentProvider, modLoader) {
@@ -26,11 +25,6 @@ namespace Mods.SteamUpdateButtons.SteamWorkshopModDownloading {
     public void Load() {
       if (_steamManager.Initialized) {
         RefreshWorkshopItems(null);
-        _steamWorkshopContentProvider.DownloadComplete += (sender, e) => {
-          RefreshWorkshopItems(() => {
-            DownloadComplete?.Invoke(this, EventArgs.Empty);
-          });
-        };
       }
     }
 
@@ -105,8 +99,20 @@ namespace Mods.SteamUpdateButtons.SteamWorkshopModDownloading {
       return false;
     }
 
-    public bool UpdateModDirectory(ModDirectory directory) {
-      return _steamWorkshopContentProvider.UpdateContentDirectory(directory.OriginPath);
+    public bool UpdateModDirectory(ModDirectory directory, Action<bool> callback) {
+      return _steamWorkshopContentProvider.UpdateContentDirectory(directory.OriginPath, r => {
+        if (r) {
+          RefreshWorkshopItems(() => {
+            callback(r);
+          });
+        } else {
+          callback(r);
+        }
+      });
+    }
+
+    public bool GetDownloadProgress(ModDirectory directory, out ulong downloaded, out ulong total) {
+      return _steamWorkshopContentProvider.GetDownloadProgress(directory.OriginPath, out downloaded, out total);
     }
   }
 }
