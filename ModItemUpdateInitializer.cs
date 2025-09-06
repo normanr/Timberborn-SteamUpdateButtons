@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Timberborn.CoreUI;
 using Timberborn.MainMenuModdingUI;
 using Timberborn.Modding;
@@ -13,13 +14,15 @@ using Mods.SteamUpdateButtons.ModdingUI;
 using Mods.SteamUpdateButtons.SteamWorkshopModDownloading;
 
 namespace Mods.SteamUpdateButtons {
-  internal class ModItemUpdateInitializer : ILoadableSingleton {
+  internal class ModItemUpdateInitializer : ILoadableSingleton, IUpdatableSingleton {
 
     private readonly UIBuilder _uiBuilder;
     private readonly ModLoader _modLoader;
     private readonly ModManagerBox _modManagerBox;
     private readonly SteamWorkshopModsProvider _steamWorkshopModsProvider;
     private readonly ITooltipRegistrar _tooltipRegistrar;
+
+    private readonly List<ModItem> _updatingMods = [];
 
     public ModItemUpdateInitializer(UIBuilder uiBuilder,
                                     ModLoader modLoader,
@@ -30,7 +33,6 @@ namespace Mods.SteamUpdateButtons {
       _modLoader = modLoader;
       _modManagerBox = modManagerBox;
       _steamWorkshopModsProvider = steamWorkshopModsProvider;
-      _steamWorkshopModsProvider.DownloadComplete += SteamWorkshopModsProvider_DownloadComplete;
       _tooltipRegistrar = tooltipRegistrar;
     }
 
@@ -40,6 +42,19 @@ namespace Mods.SteamUpdateButtons {
           continue;
         }
         Initialize(kv.Value);
+      }
+    }
+
+    public void UpdateSingleton() {
+      foreach (var modItem in _updatingMods) {
+        if (_steamWorkshopModsProvider.GetDownloadProgress(modItem.Mod.ModDirectory, out var downloaded, out var total) && total > 0) {
+          Debug.Log(DateTime.Now.ToString("HH:mm:ss ") + "Steam Update Buttons: progress " + modItem.Mod.DisplayName + $" {downloaded}/{total}");
+          var version = modItem.ModManifest.Version.AsFormattedString();
+          version += $" → {(float)downloaded / total:0%}";
+          modItem.Root.Q<Label>("ModVersion").text = version;
+        } else {
+          Debug.Log(DateTime.Now.ToString("HH:mm:ss ") + "Steam Update Buttons: no progress " + modItem.Mod.DisplayName);
+        }
       }
     }
 
@@ -62,31 +77,31 @@ namespace Mods.SteamUpdateButtons {
               !_steamWorkshopModsProvider.IsDownloadPending(modItem.Mod.ModDirectory) &&
               _steamWorkshopModsProvider.IsUpdatable(modItem.Mod.ModDirectory)));
       button.RegisterCallback<ClickEvent>(ce => {
-        Debug.Log(DateTime.Now.ToString("HH:mm:ss ") + "Steam Update Buttons: Updating: " + modItem.Mod.DisplayName);
-        if (_steamWorkshopModsProvider.UpdateModDirectory(modItem.Mod.ModDirectory)) {
-          button.ToggleDisplayStyle(false);
-          downloadPendingImage.ToggleDisplayStyle(true);
-        }
+        UpdateMod(modItem);
       });
     }
 
-    private void SteamWorkshopModsProvider_DownloadComplete(object sender, EventArgs e) {
-      _modManagerBox.GetModListView().OnModToggled(this, EventArgs.Empty);  // show restartWarning
-      foreach (var kv in _modManagerBox.GetModListView().GetModItems()) {
-        if (kv.Key.ModDirectory.IsUserMod) {
-          continue;
-        }
-        Update(kv.Value);
+    public void UpdateMod(ModItem modItem) {
+      Debug.Log(DateTime.Now.ToString("HH:mm:ss ") + "Steam Update Buttons: Updating: " + modItem.Mod.DisplayName);
+      if (_steamWorkshopModsProvider.UpdateModDirectory(modItem.Mod.ModDirectory, r => {
+        Debug.Log(DateTime.Now.ToString("HH:mm:ss ") + "Steam Update Buttons: No longer updating: " + modItem.Mod.DisplayName);
+        _updatingMods.Remove(modItem);
+        _modManagerBox.GetModListView().OnModToggled(this, EventArgs.Empty);  // show restartWarning
+        Update(modItem);
+      })) {
+        var downloadPendingImage = modItem.Root.Q<VisualElement>("DownloadPendingImage");
+        var button = modItem.Root.Q<VisualElement>("UpdateModButton");
+        button.ToggleDisplayStyle(false);
+        downloadPendingImage.ToggleDisplayStyle(true);
+        _updatingMods.Add(modItem);
       }
     }
 
     private void Update(ModItem modItem) {
       if (_modLoader.TryLoadMod(modItem.Mod.ModDirectory, out var mod)) {
         var version = modItem.ModManifest.Version.AsFormattedString();
-        if (version != mod.Manifest.Version.AsFormattedString()) {
-          version += " → " + mod.Manifest.Version.AsFormattedString();
-          modItem.Root.Q<Label>("ModVersion").text = version;
-        }
+        version += " → " + mod.Manifest.Version.AsFormattedString();
+        modItem.Root.Q<Label>("ModVersion").text = version;
       }
       var unavailableImage = modItem.Root.Q<VisualElement>("UnavailableImage");
       unavailableImage.ToggleDisplayStyle(
