@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using Timberborn.CoreUI;
 using Timberborn.MainMenuModdingUI;
 using Timberborn.Modding;
@@ -96,7 +97,13 @@ namespace Mods.SteamUpdateButtons {
     }
 
     private void Update(ModItem modItem) {
-      var directory = modItem.Mod.ModDirectory;
+      var modDirectory = modItem.Mod.ModDirectory;
+      var directory = new ModDirectory(
+        new DirectoryInfo(modDirectory.OriginPath),
+        modDirectory.IsUserMod,
+        modDirectory.DisplaySource,
+        modDirectory.GameVersion,
+        isSubdirectory: false);
       if (_modRepository.TryGetModDirectory(directory, out var versionedDirectory)) {
         directory = versionedDirectory;
       }
